@@ -14,8 +14,8 @@ val spark: SparkSession =  SparkSession.builder()
 
 spark.sparkContext.setLogLevel("ERROR")
 
-val df: DataFrame = spark.read.options(Map("inferSchema"->"true", "header"->"true")).csv("Documents/DIP/Projects/scala/data/dataD2.csv")
-df.show()
+//val df: DataFrame = spark.read.options(Map("inferSchema"->"true", "header"->"true")).csv("Documents/DIP/Projects/scala/data/dataD2.csv")
+//df.show()
 //
 //def task_kmeans(df: DataFrame, k: Int, input_cols: Array[String], select_expr_1: Array[String], agg_map: Map[String, String], select_expr_2: Array[String]) = {
 //
@@ -46,36 +46,50 @@ df.show()
 //  Array("round(`avg(a_scaled)`, 3)", "round(`avg(b_scaled)`, 3)", "round(`avg(c_scaled)`, 3)")
 //).map(r => (r.getDouble(0), r.getDouble(1), r.getDouble(2)))
 
+//
+//def task_kmeans_score(df: DataFrame, k: Int, input_cols: Array[String]) = {
+//
+//  val scaler = new MinMaxScaler().setInputCol("features_raw").setOutputCol("features")
+//  val vectorAssembler = new VectorAssembler().setInputCols(input_cols).setOutputCol("features_raw")
+//  val kmeans = new KMeans().setK(k)
+//
+//  val data_pipline = new Pipeline().setStages(Array(
+//    vectorAssembler, scaler, kmeans
+//  ))
+//
+//  val kModel = data_pipline.fit(df)
+//  val evaluator = new ClusteringEvaluator()
+//
+//  evaluator.evaluate(kModel.transform(df))
+//}
 
-def task_kmeans_score(df: DataFrame, k: Int, input_cols: Array[String]) = {
-
-  val scaler = new MinMaxScaler().setInputCol("features_raw").setOutputCol("features")
-  val vectorAssembler = new VectorAssembler().setInputCols(input_cols).setOutputCol("features_raw")
-  val kmeans = new KMeans().setK(k)
-
-  val data_pipline = new Pipeline().setStages(Array(
-    vectorAssembler, scaler, kmeans
-  ))
-
-  val kModel = data_pipline.fit(df)
-  val evaluator = new ClusteringEvaluator()
-
-  evaluator.evaluate(kModel.transform(df))
-}
 
 
+//def task4(df: DataFrame, low: Int, high: Int): Array[(Int, Double)]  = {
+//  def task4_recursion(l: Int, h: Int, res: Array[(Int, Double)]): Array[(Int, Double)] = {
+//    if (l == h ) {
+//      res ++ Array((h, task_kmeans_score(df, h, Array("a", "b"))))
+//    } else {
+//      task4_recursion(l, h-1, res ++ Array((h, task_kmeans_score(df, h, Array("a", "b")))))
+//    }
+//  }
+//
+//  task4_recursion(low, high, Array())
+//}
 
-def task4(df: DataFrame, low: Int, high: Int): Array[(Int, Double)]  = {
-  def task4_recursion(l: Int, h: Int, res: Array[(Int, Double)]): Array[(Int, Double)] = {
-    if (l == h ) {
-      res ++ Array((h, task_kmeans_score(df, h, Array("a", "b"))))
-    } else {
-      task4_recursion(l, h-1, res ++ Array((h, task_kmeans_score(df, h, Array("a", "b")))))
-    }
-  }
 
-  task4_recursion(low, high, Array())
-}
+import org.nspl._
+import org.nspl.awtrenderer._
+import scala.util.Random.nextDouble
 
-task4(df, 3, 6)
+val someData =
+  0 until 100 map (_ => nextDouble() -> nextDouble())
+
+someData.foreach(println)
+
+val plot = xyplot(someData)()
+
+renderToFile(plot, width=2000, "image/png")
+
+
 spark.close()

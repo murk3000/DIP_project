@@ -9,6 +9,9 @@ import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.functions.{avg, col, round, when}
 import org.apache.spark.sql.types.{DoubleType, StringType, StructField, StructType}
+import org.nspl._
+import org.nspl.awtrenderer._
+
 
 class Assignment {
 
@@ -19,6 +22,9 @@ class Assignment {
     .getOrCreate()
 
   spark.sparkContext.setLogLevel("ERROR")   // suppress informational or warning log messages related to the inner working of Spark
+  spark.conf.set("spark.sql.shuffle.partitions",4) // setting partitions to a small number to reduce number of files since we don't have a lot of data but do have a lot of memory
+  // 4 partitions performed 5 seconds better than 10
+
   val dataD2_schema = StructType(Array(
     StructField("a",DoubleType,true),
     StructField("b",DoubleType,true),
@@ -33,7 +39,8 @@ class Assignment {
   ))
 
   // the data frame to be used in tasks 1 and 4
-  val dataD2: DataFrame = spark.read.options(Map("header"->"true")).schema(dataD2_schema).csv("data/dataD2.csv").na.drop
+  // cached since its accessed in task 1 and 4 (made tests run 10 seconds faster)
+  val dataD2: DataFrame = spark.read.options(Map("header"->"true")).schema(dataD2_schema).csv("data/dataD2.csv").na.drop.cache()
 
 ////  To use dirty data we can use the following piece of code
 //  val dataD2_dirty: DataFrame = spark.read.options(Map("header"->"true")).schema(dataD2_schema).csv("data/dataD2_dirty.csv")
@@ -83,29 +90,7 @@ class Assignment {
 
     evaluator.evaluate(kModel.transform(df))
   }
-//// function hardcoded with number of column
-//  def task1(df: DataFrame, k: Int): Array[(Double, Double)] = {
-//
-//    val vectorAssembler = new VectorAssembler().setInputCols(Array("a", "b")).setOutputCol("features_raw")
-//    val scaler = new MinMaxScaler().setInputCol("features_raw").setOutputCol("features")
-//    val kmeans = new KMeans().setK(k)
-//
-//    val data_pipline = new Pipeline().setStages(Array(
-//      vectorAssembler, scaler, kmeans
-//    ))
-//
-//    val kModel = data_pipline.fit(df)
-//
-//    kModel.transform(df).withColumn("features",
-//      vector_to_array(col("features"))
-//    )
-//      .selectExpr("a", "b", "prediction")
-//      .groupBy("prediction")
-//      .agg(Map("a"->"mean", "b"->"mean"))
-//      .selectExpr(Array("round(`avg(a)`, 3)", "round(`avg(b)`, 3)") :_*)
-//      .collect()
-//      .map(r=>(r.getDouble(0), r.getDouble(1)))
-//  }
+
 
   def task1(df: DataFrame, k: Int): Array[(Double, Double)] = {
 //    task_kmeans(df, k,
@@ -163,11 +148,7 @@ class Assignment {
       }
     }
 
-    val scores = task4_recursion(low, high, Array())
-
-
-
-    scores
+    task4_recursion(low, high, Array())
   }
 
 }

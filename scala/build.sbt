@@ -11,7 +11,7 @@ libraryDependencies += "org.apache.spark" %% "spark-sql" % SparkVersion
 libraryDependencies += "org.apache.spark" %% "spark-streaming" % SparkVersion
 libraryDependencies += "org.scalatest" %% "scalatest" % ScalaTestVersion % "test"
 
-libraryDependencies += "io.github.pityka" %% "nspl-awt" % "0.9.0"
+libraryDependencies += "io.github.pityka" %% "nspl-awt" % "0.5.0"
 
 // suppress all log messages when setting up the Spark Session
 javaOptions += "-Dlog4j.configurationFile=project/log4j.properties"
